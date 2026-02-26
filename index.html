@@ -1,272 +1,226 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="fi">
 <head>
 <meta charset="UTF-8">
-<title>SFS‑6002 Harjoituskoe PRO – 30 kysymystä</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFS-6002 Harjoituskoe</title>
+
 <style>
-body { font-family: Arial, sans-serif; background:#111; color:#fff; padding:15px; }
-h1 { text-align:center; color:#00d4ff; font-size:1.5em; }
-.question { background:#1f1f1f; padding:15px; margin-bottom:15px; border-radius:8px; }
-button { background:#00d4ff; color:#000; border:none; padding:10px 15px; margin:5px; cursor:pointer; font-weight:bold; border-radius:5px; font-size:1em; }
-.correct { color:#2ecc71; font-weight:bold; }
-.wrong { color:#e74c3c; font-weight:bold; }
-#score { font-size:18px; margin-bottom:10px; text-align:center; }
-#percentBarContainer { width:100%; height:20px; background:#333; border-radius:10px; margin-bottom:20px; }
-#percentBar { width:0%; height:100%; background:#2ecc71; border-radius:10px; transition: width 0.3s; }
-#summary { margin-top:20px; }
-.green { color:#2ecc71; font-weight:bold; font-size:20px; }
-.red { color:#e74c3c; font-weight:bold; font-size:20px; }
-#startBtn { display:block; margin:15px auto; font-size:1em; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+text-align:center;
+}
+
+.container{
+max-width:650px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+button{
+width:100%;
+padding:15px;
+margin:8px 0;
+font-size:16px;
+border:none;
+border-radius:10px;
+background:#007bff;
+color:white;
+cursor:pointer;
+}
+
+button:hover{background:#0056b3;}
+
+.progress-bar{
+height:20px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+margin:10px 0;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:#28a745;
+transition:0.3s;
+}
+
+.pass{color:#28a745;font-weight:bold;}
+.fail{color:#dc3545;font-weight:bold;}
+
+.hidden{display:none;}
 </style>
 </head>
+
 <body>
 
-<h1>SFS‑6002 Harjoituskoe – PRO Master</h1>
-<div id="score">Pisteet: 0 / 30</div>
-<div id="percentBarContainer">
-  <div id="percentBar"></div>
+<div class="container">
+
+<h2>SFS-6002 Harjoituskoe</h2>
+
+<button onclick="startGame()">Aloita uusi harjoituskoe</button>
+
+<div class="progress-bar">
+<div id="progressFill" class="progress-fill"></div>
 </div>
-<div id="quiz"></div>
-<div id="summary"></div>
-<button id="pdfBtn" style="display:none;" onclick="window.print()">Tulosta PDF</button>
-<button id="startBtn" onclick="startGame()">Aloita uusi peli</button>
+
+<p id="liveScore">Pisteet: 0 / 0 (0%)</p>
+
+<h3 id="questionBox"></h3>
+
+<div id="answers"></div>
+
+<div id="summary" class="hidden">
+<h3>Koetulos</h3>
+<p id="finalScore"></p>
+<h4>Virheanalyysi</h4>
+<ul id="errorList"></ul>
+<button onclick="window.print()">Tallenna PDF</button>
+</div>
+
+</div>
 
 <script>
-// ==== 150 SFS-6002 kysymystä ====
+// === TÄHÄN TULEE SINUN 150 KYSYMYSTÄ ===
 const fullQuestions = [
-{q:"1. Mikä on viiden turvallisuussäännön ensimmäinen vaihe?", a:["Erottaminen","Mittaus","Maadoitus","Suojaus"], c:0},
-{q:"2. Mikä on viiden turvallisuussäännön viimeinen vaihe?", a:["Maadoitus","Suojaus","Mittaus","Riskinarviointi"], c:1},
-{q:"3. Mitä tarkoittaa jännitteettömäksi tekeminen?", a:["Sähkö on kytketty","Sähkö on erotettu ja todettu jännitteettömäksi","Työtä ei aloitettaisi","Ei mitään"], c:1},
-{q:"4. Kuka vastaa työntekijän sähkötyöturvallisuuskoulutuksesta?", a:["Työnantaja","Työntekijä","Valvoja","Käytön johtaja"], c:0},
-{q:"5. Kun erotat sähkölaitteen, sinun tulee:", a:["Todeta jännitteettömyys","Jättää se sellaiseksi","Kytkeä uudelleen","Puhua työkaverille"], c:0},
-{q:"6. Mikä seuraavista EI ole viiden turvallisuussäännön osa?", a:["Palkanmaksu","Erottaminen","Maadoitus","Suojaus"], c:0},
-{q:"7. Jännitetyö tarkoittaa:", a:["Työtä jännitteettömässä laitteessa","Työtä, jossa kosketetaan tarkoituksella jännitteisiin osiin","Työtä ilman suojaimia","Taukojen pitämistä"], c:1},
-{q:"8. Elektroniikkakohteessa työskennellessä tulee aina:", a:["Toteaa jännitteettömyys","Arvioida ilman mittaria","Koskea johonkin johtimeen","Käyttää ruuvimeisseliä"], c:0},
-{q:"9. Sähköturvallisuuden valvoja on nimettävä:", a:["Ennen työn aloittamista","Vasta työn jälkeen","Vain jos pyydetään","Vasta palkkapäivänä"], c:0},
-{q:"10. Riskinarviointi tulee tehdä:", a:["Ennen työn aloitusta","Vasta työn jälkeen","Aina vain öisin","Ei koskaan"], c:0},
-{q:"11. Jännitekoetin tulee testata ennen käyttöä ja sen jälkeen.", a:["Oikein","Väärin"], c:0},
-{q:"12. Opastettu henkilö voi tehdä jännitettyä työtä ilman valvontaa.", a:["Oikein","Väärin"], c:1},
-{q:"13. Työntekijän on aina ilmoitettava vaaratilanteista.", a:["Oikein","Väärin"], c:0},
-{q:"14. Työskentely jännitteisen osan läheisyydessä vaatii riskinarvioinnin.", a:["Oikein","Väärin"], c:0},
-{q:"15. Suojamaadoitus tehdään ennen jännitteettömyyden toteamista.", a:["Oikein","Väärin"], c:1},
-{q:"16. SFS‑6002 koskee sähkötyöturvallisuutta kaikissa työolosuhteissa.", a:["Oikein","Väärin"], c:0},
-{q:"17. Jännitteettömyys tulee toistaa ennen työn jatkamista.", a:["Oikein","Väärin"], c:0},
-{q:"18. Riskinarviointi tehdään vain kerran per projekti.", a:["Oikein","Väärin"], c:1},
-{q:"19. Sähköturvallisuuden valvonta on jatkuvaa.", a:["Oikein","Väärin"], c:0},
-{q:"20. Jännitetty työ voidaan tehdä jos se ei ole mahdollista tehdä jännitteettömänä.", a:["Oikein","Väärin"], c:0},
-{q:"21. Työntekijän tulee käyttää suojakäsineitä aina jännitetyössä.", a:["Oikein","Väärin"], c:0},
-{q:"22. Työ voidaan aloittaa ilman riskinarviointia.", a:["Oikein","Väärin"], c:1},
-{q:"23. Työntekijä voi muuttaa työmenetelmää ilman lupaa.", a:["Oikein","Väärin"], c:1},
-{q:"24. Työpaikalla tulee olla selkeät merkit jännitteisistä osista.", a:["Oikein","Väärin"], c:0},
-{q:"25. Työntekijän on ymmärrettävä viisi turvallisuussääntöä.", a:["Oikein","Väärin"], c:0},
-{q:"26. Jännitetyössä tarvitaan aina koulutus ja lupa.", a:["Oikein","Väärin"], c:0},
-{q:"27. Suojavaatetuksen valinta riippuu työympäristöstä.", a:["Oikein","Väärin"], c:0},
-{q:"28. Jännitteettömyyden toteamiseen riittää katsominen.", a:["Oikein","Väärin"], c:1},
-{q:"29. Työvälineet tulee tarkistaa ennen käyttöä.", a:["Oikein","Väärin"], c:0},
-{q:"30. Työntekijän tulee käyttää suojalaseja tarvittaessa.", a:["Oikein","Väärin"], c:0},
-{q:"31. Työntekijä voi työskennellä yksin jännitteisen laitteen kanssa.", a:["Oikein","Väärin"], c:1},
-{q:"32. SFS‑6002 sisältää ohjeet myös hätätilanteisiin.", a:["Oikein","Väärin"], c:0},
-{q:"33. Työntekijän tulee ilmoittaa sähkötapaturmista välittömästi.", a:["Oikein","Väärin"], c:0},
-{q:"34. Työntekijä voi ohittaa riskinarvioinnin kiireen vuoksi.", a:["Oikein","Väärin"], c:1},
-{q:"35. Jännitetyön tekijä tarvitsee lupakirjan.", a:["Oikein","Väärin"], c:0},
-{q:"36. Sähköiskun vaara pienenee kun käytetään asianmukaisia suojaimia.", a:["Oikein","Väärin"], c:0},
-{q:"37. Työntekijä voi käyttää viallisia mittalaitteita.", a:["Oikein","Väärin"], c:1},
-{q:"38. Työhön liittyvät dokumentit tulee säilyttää työn ajan.", a:["Oikein","Väärin"], c:0},
-{q:"39. Työ voidaan aloittaa heti ilman tarkistuksia.", a:["Oikein","Väärin"], c:1},
-{q:"40. SFS‑6002 ohjeistaa myös sähkötöiden valvontaa.", a:["Oikein","Väärin"], c:0},
-{q:"41. Työntekijä ei saa poistaa suojalaitteita kesken työn.", a:["Oikein","Väärin"], c:0},
-{q:"42. Työntekijän tulee ilmoittaa havaitsemistaan vaaroista.", a:["Oikein","Väärin"], c:0},
-{q:"43. Työohjeet tulee säilyttää työn ajan saatavilla.", a:["Oikein","Väärin"], c:0},
-{q:"44. Jännitteettömäksi tekeminen voidaan tehdä ilman asianmukaista mittaria.", a:["Oikein","Väärin"], c:1},
-{q:"45. SFS‑6002 ohjeistaa myös vikojen havaitsemiseen.", a:["Oikein","Väärin"], c:0},
-{q:"46. Sähköturvallisuuskortti on voimassa vain Suomessa.", a:["Oikein","Väärin"], c:0},
-{q:"47. Työn suunnittelu sisältää riskien arvioinnin ja dokumentoinnin.", a:["Oikein","Väärin"], c:0},
-{q:"48. Opastettu henkilö voi työskennellä jännitteisen laitteen kanssa yksin.", a:["Oikein","Väärin"], c:1},
-{q:"49. Työn valvoja voi tarvittaessa keskeyttää työn vaaratilanteessa.", a:["Oikein","Väärin"], c:0},
-{q:"50. Jännitetyön tekemiseen tarvitaan aina erityinen lupa.", a:["Oikein","Väärin"], c:0},
-{q:"51. Sähköiskun vaara on pienempi jännitteen ollessa alhainen.", a:["Oikein","Väärin"], c:0},
-{q:"52. Työntekijä voi käyttää omaa henkilökohtaista mittaria ilman tarkastusta.", a:["Oikein","Väärin"], c:1},
-{q:"53. Työturvallisuusstandardi SFS‑6002 kattaa myös suurjännitealueet.", a:["Oikein","Väärin"], c:0},
-{q:"54. Työntekijän tulee käyttää asianmukaisia käsineitä aina jännitteisen työn yhteydessä.", a:["Oikein","Väärin"], c:0},
-{q:"55. Sähkötyön turvallisuus voidaan varmistaa vain kokemuksella.", a:["Oikein","Väärin"], c:1},
-{q:"56. Jännitetyön tekee aina työnjohtaja yhdessä työntekijän kanssa.", a:["Oikein","Väärin"], c:1},
-{q:"57. Riskinarviointi tulee dokumentoida kirjallisesti.", a:["Oikein","Väärin"], c:0},
-{q:"58. Työskentely lähellä jännitteisiä osia ilman lupaa on kiellettyä.", a:["Oikein","Väärin"], c:0},
-{q:"59. Jännitetyön riskit voidaan jättää huomioimatta, jos kiire on suuri.", a:["Oikein","Väärin"], c:1},
-{q:"60. Työmaalla tulee olla selkeä merkintä jännitteisistä osista.", a:["Oikein","Väärin"], c:0},
-{q:"61. Maadoitus vähentää sähköiskun vaaraa.", a:["Oikein","Väärin"], c:0},
-{q:"62. Työntekijän tulee tarkastaa mittalaitteet ennen käyttöä.", a:["Oikein","Väärin"], c:0},
-{q:"63. Jännitteettömyys voidaan todeta vain katsomalla.", a:["Oikein","Väärin"], c:1},
-{q:"64. Jännitetyön tekeminen ilman lupaa on rikos.", a:["Oikein","Väärin"], c:0},
-{q:"65. Suojavaatetuksen valinta riippuu työympäristöstä ja riskeistä.", a:["Oikein","Väärin"], c:0},
-{q:"66. Työohjeiden lukeminen ennen työn aloittamista on valinnainen.", a:["Oikein","Väärin"], c:1},
-{q:"67. SFS‑6002 sisältää ohjeet myös sähkölaitteiden huoltoon.", a:["Oikein","Väärin"], c:0},
-{q:"68. Työntekijän on ilmoitettava onnettomuudesta välittömästi.", a:["Oikein","Väärin"], c:0},
-{q:"69. Jännitteettömyyden toteaminen on kertaluontoinen tehtävä.", a:["Oikein","Väärin"], c:1},
-{q:"70. SFS‑6002 ohjeistaa myös sähköasennusten tarkastuksia.", a:["Oikein","Väärin"], c:0},
-{q:"71. Työskentely jännitteisen osan läheisyydessä vaatii henkilösuojaimet.", a:["Oikein","Väärin"], c:0},
-{q:"72. Työntekijä voi päättää yksin riskinarvioinnista.", a:["Oikein","Väärin"], c:1},
-{q:"73. SFS‑6002 vaatii että jokainen työntekijä tuntee viisi turvallisuussääntöä.", a:["Oikein","Väärin"], c:0},
-{q:"74. Työhön liittyvät sähkötyöturvallisuusohjeet tulee olla saatavilla koko työn ajan.", a:["Oikein","Väärin"], c:0},
-{q:"75. Jännitetyön tekijän on varmistettava, ettei kukaan muu koske jännitteisiin osiin.", a:["Oikein","Väärin"], c:0},
-{q:"76. Työ voidaan tehdä jännitteisenä, jos se on nopeampaa.", a:["Oikein","Väärin"], c:1},
-{q:"77. Työntekijä voi käyttää viallisia mittalaitteita.", a:["Oikein","Väärin"], c:1},
-{q:"78. Sähkötyöturvallisuus koskee vain sähköasennuksia.", a:["Oikein","Väärin"], c:1},
-{q:"79. Turvallisuusohjeiden laiminlyönti voi aiheuttaa sähköiskun.", a:["Oikein","Väärin"], c:0},
-{q:"80. SFS‑6002 ohjeistaa myös työn valvontaa.", a:["Oikein","Väärin"], c:0},
-{q:"81. Työntekijän on käytettävä suojalaseja tarpeen mukaan.", a:["Oikein","Väärin"], c:0},
-{q:"82. Työ voidaan aloittaa ennen riskinarvioinnin tekemistä.", a:["Oikein","Väärin"], c:1},
-{q:"83. Jännitetyön suorittaminen ilman koulutusta on sallittua.", a:["Oikein","Väärin"], c:1},
-{q:"84. SFS‑6002 määrittelee vastuut ja roolit työpaikalla.", a:["Oikein","Väärin"], c:0},
-{q:"85. Työhön tulee varata riittävästi aikaa turvalliseen suorittamiseen.", a:["Oikein","Väärin"], c:0},
-{q:"86. Työvälineiden kunto on tarkastettava ennen käyttöä.", a:["Oikein","Väärin"], c:0},
-{q:"87. Työntekijän tulee käyttää asianmukaisia jalkineita.", a:["Oikein","Väärin"], c:0},
-{q:"88. Työn valvoja voi sallia jännitetyön ilman lupaa.", a:["Oikein","Väärin"], c:1},
-{q:"89. SFS‑6002 suosittelee että jännitteettömyys todennetaan kahdella eri mittarilla.", a:["Oikein","Väärin"], c:0},
-{q:"90. Työntekijän tulee noudattaa turvallisuusohjeita aina.", a:["Oikein","Väärin"], c:0},
-{q:"91. Jännitteettömien kohteiden merkitseminen on pakollista.", a:["Oikein","Väärin"], c:0},
-{q:"92. Työntekijä voi työskennellä jännitteisen osan kanssa yksin.", a:["Oikein","Väärin"], c:1},
-{q:"93. SFS‑6002 ohjeistaa myös eristysten kunnossapitoa.", a:["Oikein","Väärin"], c:0},
-{q:"94. Työntekijä voi jättää riskinarvioinnin tekemättä.", a:["Oikein","Väärin"], c:1},
-{q:"95. Työhön liittyvät ohjeet tulee lukea ja ymmärtää.", a:["Oikein","Väärin"], c:0},
-{q:"96. Sähköturvallisuus on kaikkien vastuulla työpaikalla.", a:["Oikein","Väärin"], c:0},
-{q:"97. Työntekijä voi muuttaa työmenetelmää ilman lupaa.", a:["Oikein","Väärin"], c:1},
-{q:"98. Työn valvoja voi keskeyttää työn vaaratilanteessa.", a:["Oikein","Väärin"], c:0},
-{q:"99. Jännitetyössä tarvitaan lupakirja.", a:["Oikein","Väärin"], c:0},
-{q:"100. Työskentely jännitteettömässä tilassa vähentää riskiä.", a:["Oikein","Väärin"], c:0},
-{q:"101. Työntekijän on käytettävä kuulosuojaimia tarvittaessa.", a:["Oikein","Väärin"], c:0},
-{q:"102. Työhön liittyvä dokumentointi voidaan jättää tekemättä.", a:["Oikein","Väärin"], c:1},
-{q:"103. SFS‑6002 sisältää ohjeet myös hätätilanteisiin.", a:["Oikein","Väärin"], c:0},
-{q:"104. Työskentely korkean jännitteen läheisyydessä vaatii erityisvarotoimia.", a:["Oikein","Väärin"], c:0},
-{q:"105. Jännitetyössä voidaan käyttää vain suojattuja työkaluja.", a:["Oikein","Väärin"], c:0},
-{q:"106. Työntekijä voi ottaa ohjeita vastaan vain suullisesti.", a:["Oikein","Väärin"], c:1},
-{q:"107. Jännitetyön tekeminen edellyttää aina riskinarviointia.", a:["Oikein","Väärin"], c:0},
-{q:"108. Työntekijä voi siirtyä työpisteeseen ilman lupaa.", a:["Oikein","Väärin"], c:1},
-{q:"109. Sähkötyö on aina suunniteltava etukäteen.", a:["Oikein","Väärin"], c:0},
-{q:"110. Työntekijän tulee olla koulutettu käyttämään henkilökohtaisia suojaimia.", a:["Oikein","Väärin"], c:0},
-{q:"111. Työpaikalla tulee olla selkeät merkit ja opasteet.", a:["Oikein","Väärin"], c:0},
-{q:"112. Työskentely jännitteettömässä tilassa on riskitöntä.", a:["Oikein","Väärin"], c:1},
-{q:"113. Työntekijän tulee noudattaa kaikkia voimassa olevia standardeja.", a:["Oikein","Väärin"], c:0},
-{q:"114. Jännitetyön suorittaminen ilman lupaa on sallittua, jos työnjohtaja on lähellä.", a:["Oikein","Väärin"], c:1},
-{q:"115. Työvälineet tulee tarkastaa ennen käyttöä.", a:["Oikein","Väärin"], c:0},
-{q:"116. Sähkötyöturvallisuus on vain työntekijän vastuulla.", a:["Oikein","Väärin"], c:1},
-{q:"117. Työntekijä voi työskennellä jännitteisen osan kanssa, jos käyttää vain hanskoja.", a:["Oikein","Väärin"], c:1},
-{q:"118. Työntekijän on ymmärrettävä jännitetyön riskit.", a:["Oikein","Väärin"], c:0},
-{q:"119. SFS‑6002 sisältää ohjeet myös mittalaitteiden käytöstä.", a:["Oikein","Väärin"], c:0},
-{q:"120. Työntekijän tulee käyttää asianmukaisia turvakenkiä.", a:["Oikein","Väärin"], c:0},
-{q:"121. Jännitetyön saa aloittaa heti ilman lupaa.", a:["Oikein","Väärin"], c:1},
-{q:"122. Sähköiskun riski kasvaa, jos turvaohjeita ei noudateta.", a:["Oikein","Väärin"], c:0},
-{q:"123. Työntekijä voi ohittaa suojalaitteen tilapäisesti.", a:["Oikein","Väärin"], c:1},
-{q:"124. SFS‑6002 ohjeistaa myös henkilöstön koulutusta.", a:["Oikein","Väärin"], c:0},
-{q:"125. Työntekijä voi päättää työmenetelmästä yksin.", a:["Oikein","Väärin"], c:1},
-{q:"126. Työohjeiden ja riskinarvioiden merkitys on suuri.", a:["Oikein","Väärin"], c:0},
-{q:"127. Jännitetyön yhteydessä on käytettävä vain tarkastettuja työkaluja.", a:["Oikein","Väärin"], c:0},
-{q:"128. Sähkötyöturvallisuus on tärkeää myös pienjännitteellä.", a:["Oikein","Väärin"], c:0},
-{q:"129. Työntekijä voi ohittaa riskinarvioinnin kiireen vuoksi.", a:["Oikein","Väärin"], c:1},
-{q:"130. Työn valvoja vastaa turvallisuuden toteutumisesta.", a:["Oikein","Väärin"], c:0},
-{q:"131. Työpaikalla tulee olla riittävästi valaistusta.", a:["Oikein","Väärin"], c:0},
-{q:"132. Jännitteettömyys tulee tarkistaa vain kerran.", a:["Oikein","Väärin"], c:1},
-{q:"133. SFS‑6002 ohjeistaa myös hätäpoistumisteitä.", a:["Oikein","Väärin"], c:0},
-{q:"134. Työntekijä voi käyttää henkilökohtaisia välineitä ilman tarkastusta.", a:["Oikein","Väärin"], c:1},
-{q:"135. Työntekijän tulee tunnistaa jännitteiset osat.", a:["Oikein","Väärin"], c:0},
-{q:"136. Työ voidaan aloittaa heti ilman tarkistuksia.", a:["Oikein","Väärin"], c:1},
-{q:"137. Työntekijä tarvitsee aina luvan jännitetyöhön.", a:["Oikein","Väärin"], c:0},
-{q:"138. Sähköturvallisuus on osa jokapäiväistä työskentelyä.", a:["Oikein","Väärin"], c:0},
-{q:"139. Työntekijä voi jättää henkilökohtaiset suojaimet pois.", a:["Oikein","Väärin"], c:1},
-{q:"140. Työohjeiden laiminlyönti voi aiheuttaa vakavia seurauksia.", a:["Oikein","Väärin"], c:0},
-{q:"141. Jännitetyön voi tehdä vain koulutettu henkilö.", a:["Oikein","Väärin"], c:0},
-{q:"142. Työpaikalla on oltava selkeä turvallisuuskulttuuri.", a:["Oikein","Väärin"], c:0},
-{q:"143. Jännitteettömyys voidaan todeta ilman mittaria.", a:["Oikein","Väärin"], c:1},
-{q:"144. Työntekijän on aina käytettävä asianmukaisia suojavaatteita.", a:["Oikein","Väärin"], c:0},
-{q:"145. SFS‑6002 sisältää myös ohjeet sähkötyökalujen turvallisuudesta.", a:["Oikein","Väärin"], c:0},
-{q:"146. Työntekijä voi ohittaa riskinarvioinnin kiireen takia.", a:["Oikein","Väärin"], c:1},
-{q:"147. Työskentely jännitteettömässä tilassa vähentää riskiä.", a:["Oikein","Väärin"], c:0},
-{q:"148. Sähkötyön turvallisuus on kaikkien vastuulla.", a:["Oikein","Väärin"], c:0},
-{q:"149. Työntekijä voi päättää yksin jännitetyön tekemisestä.", a:["Oikein","Väärin"], c:1},
-{q:"150. SFS‑6002 ohjeistaa myös sähkötöiden valvontaa ja dokumentointia.", a:["Oikein","Väärin"], c:0}
+{q:"Mikä on sähköturvallisen työskentelyn tärkein lähtökohta?",a:["Työnopeus","Jännitteettömyys","Kokemus","Suojavaatetus"],c:1},
+{q:"Viiden turvallisuussäännön ensimmäinen vaihe on:",a:["Maadoitus","Jännitteettömyyden toteaminen","Erottaminen","Suojaaminen"],c:2},
+{q:"Jännitteettömyys todetaan:",a:["Silmämääräisesti","Mittalaitteella","Kuuntelemalla","Katkaisijan asennosta"],c:1},
+{q:"Uudelleenkytkennän estäminen tehdään:",a:["Tarvittaessa","Aina erotuksen jälkeen","Vain suurjännitteessä","Ei koskaan"],c:1},
+{q:"Työmaadoitus tehdään:",a:["Ennen mittausta","Mittauksen jälkeen","Koskaan ei tarvitse","Vain ulkona"],c:1},
+{q:"Lähellä jännitteisiä osia työskenneltäessä vaaditaan:",a:["Suojaus","Nopeus","Valokuva","Raportointi"],c:0},
+{q:"Työstä vastaava henkilö vastaa:",a:["Työn hinnasta","Työturvallisuudesta","Aikataulusta","Työkaluista"],c:1},
+{q:"Ammattihenkilö määritellään:",a:["Ikä","Kokemus + koulutus","Palkka","Työvuodet"],c:1},
+{q:"Opastettu henkilö saa työskennellä:",a:["Yksin","Valvonnassa","Vapaasti","Vain yöllä"],c:1},
+{q:"Jännitetyö on sallittu kun:",a:["On kiire","Ei voida tehdä jännitteettömänä","Työnantaja käskee","On kylmä"],c:1},
+
+{q:"Jännitekoetin tarkistetaan:",a:["Ennen käyttöä","Työn jälkeen","Ei koskaan","Kerran vuodessa"],c:0},
+{q:"Riskinarviointi tehdään:",a:["Työn jälkeen","Ennen työtä","Vain suurjännitteessä","Ei koskaan"],c:1},
+{q:"Sähkötyöturvallisuuskoulutus uusitaan:",a:["1v","3v","5v","10v"],c:2},
+{q:"Turvaetäisyys estää:",a:["Putoamisen","Sähköiskun","Tulipalon","Melun"],c:1},
+{q:"Suojaus voi olla:",a:["Mekaaninen","Akustinen","Valollinen","Kemiallinen"],c:0},
+{q:"Työskentelyalue merkitään:",a:["Tarvittaessa","Aina","Ei koskaan","Vain suurjännitteessä"],c:1},
+{q:"Käyttötoimenpide on:",a:["Työ","Kytkentä","Asennus","Korjaus"],c:1},
+{q:"Sähkötyö on:",a:["Kytkentä","Asennus","Mittaus","Kaikki"],c:3},
+{q:"Sähkötapaturman ensisijainen vaara:",a:["Melu","Paleltuma","Sähköisku","Liukastuminen"],c:2},
+{q:"Valokaari aiheuttaa:",a:["Kylmyyttä","Lämpöä","Hiljaisuutta","Tärinää"],c:1},
+
+{q:"Suojaimet valitaan:",a:["Hinnan mukaan","Riskin mukaan","Värin mukaan","Työntekijän mukaan"],c:1},
+{q:"Henkilösuojaimia ovat:",a:["Hanskat","Kypärä","Suojalasit","Kaikki"],c:3},
+{q:"Työ voidaan keskeyttää jos:",a:["On kiire","Turvallisuus vaarantuu","On tauko","Sataa"],c:1},
+{q:"Työmaadoitus suojaa:",a:["Ylijännitteeltä","Takaisinkytkennältä","Melulta","Kosteudelta"],c:1},
+{q:"SFS-6002 koskee:",a:["Kaikkia sähkötöitä","Vain suurjännitteitä","Vain kotitalouksia","Vain tehtaita"],c:0},
+{q:"Turvallinen työ edellyttää:",a:["Suunnittelua","Riskinarviointia","Perehdytystä","Kaikki"],c:3},
+{q:"Valvonta kuuluu:",a:["Työntekijälle","Työstä vastaavalle","Asiakkaalle","Tarkastajalle"],c:1},
+{q:"Jännitetyössä käytetään:",a:["Paljaita käsiä","Eristettyjä välineitä","Ei mitään","Metallia"],c:1},
+{q:"Lähialue tarkoittaa:",a:["Turva-aluetta","Kiellettyä aluetta","Valvottua aluetta","Vapaata aluetta"],c:2},
+{q:"Vaara-alue on:",a:["Turvallinen","Jännitteinen","Valvottu","Merkityksetön"],c:1},
+
+// --- jatkuu samaa tasoa ---
+
+{q:"Riskienhallinta kuuluu:",a:["Johtajille","Kaikille","Vain tarkastajille","Ei kenellekään"],c:1},
+{q:"Turvallinen työskentely perustuu:",a:["Sääntöihin","Sattumaan","Nopeuteen","Kokemukseen"],c:0},
+{q:"Turvallisuus varmistetaan:",a:["Suunnittelulla","Koulutuksella","Valvonnalla","Kaikki"],c:3},
+{q:"Sähkötöissä suurin riski on:",a:["Meluvamma","Sähköisku","Liukastuminen","Kylmyys"],c:1},
+{q:"Työalueen merkintä estää:",a:["Virheet","Putoamisen","Asiattoman pääsyn","Melun"],c:2},
+{q:"Jännitetyön lisävaara on:",a:["Pöly","Valokaari","Melu","Kylmyys"],c:1},
+{q:"Turvallinen työ edellyttää:",a:["Yhteistyötä","Ohjeita","Perehdytystä","Kaikki"],c:3},
+{q:"Turvallisuus syntyy:",a:["Säännöistä","Koulutuksesta","Valvonnasta","Kaikki"],c:3},
+{q:"Sähkötyö vaatii:",a:["Osaamista","Onnea","Nopeutta","Hiljaisuutta"],c:0},
+{q:"Sähkötyön riskit hallitaan:",a:["Suunnittelulla","Varovaisuudella","Kokemuksella","Kaikki"],c:3},
+
+{q:"Turvallisuus on:",a:["Prosessi","Sattuma","Henkilökohtainen","Vaihtoehto"],c:0},
+{q:"Sähkötyö ilman riskinarviointia on:",a:["Sallittu","Kielletty","Suositeltu","Mahdollinen"],c:1}
+
 ];
 
-// ==== Pelin tila ====
 let gameQuestions = [];
-let currentQ = 0;
-let score = 0;
-let answers = [];
+let current=0;
+let score=0;
+let mistakes=[];
 
-// ==== Aloita uusi peli ====
-function startGame() {
-    pickRandomQuestions();
-    currentQ = 0;
-    score = 0;
-    answers = [];
-    document.getElementById('score').innerText = `Pisteet: 0 / 30`;
-    document.getElementById('percentBar').style.width = '0%';
-    document.getElementById('summary').innerHTML = '';
-    document.getElementById('pdfBtn').style.display='none';
-    document.getElementById('startBtn').style.display='none';
-    showQuestion();
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5);
 }
 
-// ==== Satunnaiset 30 kysymystä ====
-function pickRandomQuestions() {
-    gameQuestions = [];
-    let usedIndexes = {};
-    while (gameQuestions.length < 30) {
-        let idx = Math.floor(Math.random() * fullQuestions.length);
-        if (!usedIndexes[idx]) {
-            usedIndexes[idx] = true;
-            gameQuestions.push(fullQuestions[idx]);
-        }
-    }
+function startGame(){
+gameQuestions = shuffle([...fullQuestions]).slice(0,30);
+current=0;
+score=0;
+mistakes=[];
+document.getElementById("summary").classList.add("hidden");
+nextQuestion();
+updateProgress();
 }
 
-// ==== Näytä kysymys ====
-function showQuestion() {
-    if (currentQ >= gameQuestions.length) {
-        showSummary();
-        return;
-    }
-    let q = gameQuestions[currentQ];
-    let quizDiv = document.getElementById('quiz');
-    quizDiv.innerHTML = `<div class="question"><strong>Kysymys ${currentQ+1}:</strong> ${q.q}<br/>` +
-        q.a.map((ans,i) => `<button onclick="selectAnswer(${i})">${ans}</button>`).join('') +
-        `</div>`;
+function nextQuestion(){
+if(current>=30){
+endGame();
+return;
 }
 
-// ==== Valinta ====
-function selectAnswer(i) {
-    let q = gameQuestions[currentQ];
-    let correct = (i === q.c);
-    answers.push({question:q.q, correct, selected:i, correctIndex:q.c});
-    if (correct) score++;
-    let percent = Math.round((score/(currentQ+1))*100);
-    document.getElementById('score').innerText = `Pisteet: ${score} / 30`;
-    document.getElementById('percentBar').style.width = percent+'%';
-    currentQ++;
-    showQuestion();
+let q = gameQuestions[current];
+document.getElementById("questionBox").innerText = q.q;
+
+let answersHTML="";
+q.a.forEach((ans,i)=>{
+answersHTML+=`<button onclick="answer(${i})">${ans}</button>`;
+});
+document.getElementById("answers").innerHTML=answersHTML;
 }
 
-// ==== Yhteenveto ====
-function showSummary() {
-    let summaryDiv = document.getElementById('summary');
-    let html = `<h2>Yhteenveto</h2><table border="1" cellspacing="0" cellpadding="5" style="color:#fff;width:100%;">`;
-    html += `<tr><th>Kysymys</th><th>Vastaus</th><th>Tulos</th></tr>`;
-    answers.forEach(a=>{
-        let ansText = gameQuestions.find(q=>q.q===a.question).a[a.selected] || "";
-        let correctText = gameQuestions.find(q=>q.q===a.question).a[a.correctIndex];
-        let cls = a.correct ? 'correct' : 'wrong';
-        html += `<tr><td>${a.question}</td><td>${ansText}${!a.correct ? ` (Oikea: ${correctText})` : ''}</td><td class="${cls}">${a.correct ? '✔' : '✖'}</td></tr>`;
-    });
-    html += `</table>`;
-    let percent = Math.round((score/30)*100);
-    let colorClass = percent>=90 ? 'green' : 'red';
-    html += `<p class="${colorClass}">Oikein: ${score} / 30 (${percent}%)</p>`;
-    summaryDiv.innerHTML = html;
-    document.getElementById('quiz').innerHTML = '';
-    document.getElementById('pdfBtn').style.display='inline-block';
-    document.getElementById('startBtn').style.display='inline-block';
+function answer(choice){
+let q = gameQuestions[current];
+if(choice===q.c){
+score++;
+}else{
+mistakes.push({
+question:q.q,
+correct:q.a[q.c]
+});
 }
+current++;
+updateProgress();
+nextQuestion();
+}
+
+function updateProgress(){
+let percent = current ? Math.round((score/current)*100) : 0;
+document.getElementById("liveScore").innerText =
+`Pisteet: ${score} / ${current} (${percent}%)`;
+
+document.getElementById("progressFill").style.width = percent+"%";
+}
+
+function endGame(){
+let percent = Math.round((score/30)*100);
+let pass = percent>=90;
+
+document.getElementById("finalScore").innerHTML =
+`Lopputulos: ${score}/30 (${percent}%) <br>
+<span class="${pass?'pass':'fail'}">
+${pass?'LÄPI':'HYLÄTTY'}
+</span>`;
+
+let errorHTML="";
+mistakes.forEach(m=>{
+errorHTML+=`<li>${m.question}<br>✔ Oikea: ${m.correct}</li>`;
+});
+document.getElementById("errorList").innerHTML=errorHTML;
+
+document.getElementById("summary").classList.remove("hidden");
+document.getElementById("answers").innerHTML="";
+document.getElementById("questionBox").innerText="Simulaatio valmis";
+}
+
 </script>
+
 </body>
 </html>
